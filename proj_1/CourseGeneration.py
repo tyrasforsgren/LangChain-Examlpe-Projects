@@ -37,7 +37,7 @@ load_dotenv()
 API_KEY = os.getenv('API_KEY')
 
 
-def generate_output(system_template, product_description, max_tokens=300): # TODO: Make sure this is optimal
+def generate_output(system_template, product_description, max_tokens=300):
     """
     Generate output content for the chat using the ChatOpenAI model.
 
@@ -54,25 +54,42 @@ def generate_output(system_template, product_description, max_tokens=300): # TOD
     -------
     str
         Generated content.
+
+    Notes
+    -----
+    This function uses the ChatOpenAI model to generate content based on the provided system template
+    and product description. It ensures that the generated output is completed before the maximum number
+    of tokens is reached to prevent the output from being cut off mid-way.
+
+    The system template is augmented with information about the number of tokens and the provided prompt
+    to assist in generating the content effectively.
+    
+    This function is the basis of all methods in the CourseGeneration.CourseGenerator class.
     """
-    # Init model
+    # Augment system template with additional information
+    system_template = f"Ensure that your generated output is finished before the \
+                    amount of tokens run out. This is to ensure that your output is not cut off mid-way. \
+                    Amount of tokens: {max_tokens} \
+                    Following is your prompt: {system_template}"
+
+    # Initialize the model
     llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                      openai_api_key=API_KEY,
                      temperature=1,
                      max_tokens=max_tokens)
 
-    # Create human prompt with proper template
+    # Create human prompt with the proper template
     human_template = "{product_description_temp}"
     human_prompt = HumanMessagePromptTemplate.from_template(human_template)
 
-    # Translate prompt
+    # Translate the prompt
     chat_prompt = ChatPromptTemplate.from_messages([
         system_template,
         human_prompt])
     final_prompt = chat_prompt.format_prompt(
         product_description_temp=product_description)
 
-    # Generate
+    # Generate content
     result = llm.invoke(final_prompt)
     return result.content
 
