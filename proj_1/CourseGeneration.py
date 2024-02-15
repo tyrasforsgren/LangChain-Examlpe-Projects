@@ -29,15 +29,15 @@ print(marketing_aid.generate_coding_exercises("Pandas module"))
 
 import os
 from dotenv import load_dotenv
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 
 # Get secret API key from hidden .env file
 load_dotenv()
-API_KEY = os.getenv('API_KEY')
+API_KEY = os.getenv('API_KEY') # change key in .env file
 
 
-def generate_output(system_template, product_description, max_tokens=300):
+def generate_output(system_template:str, product_description:str, max_tokens=1000) -> str:
     """
     Generate output content for the chat using the ChatOpenAI model.
 
@@ -48,7 +48,8 @@ def generate_output(system_template, product_description, max_tokens=300):
     product_description : str
         The product description.
     max_tokens : int, optional
-        The maximum number of tokens for the output.
+        The maximum number of tokens / characters for the output.
+        Default : 1000
 
     Returns
     -------
@@ -58,19 +59,24 @@ def generate_output(system_template, product_description, max_tokens=300):
     Notes
     -----
     This function uses the ChatOpenAI model to generate content based on the provided system template
-    and product description. It ensures that the generated output is completed before the maximum number
-    of tokens is reached to prevent the output from being cut off mid-way.
+    and product description. The model aims to adhere to the max_tokens limit, but it may not always
+    generate responses exactly at that length. Lower limits may result in truncated responses. Default
+    is set to 1000, and maximum limits below this are not reccomended in most cases. Note that tokens
+    should adhere to the complexity of the prompt. 
 
-    The system template is augmented with information about the number of tokens and the provided prompt
+    The system template is augmented with detailed information about the number of tokens and the provided prompt
     to assist in generating the content effectively.
     
     This function is the basis of all methods in the CourseGeneration.CourseGenerator class.
     """
-    # Augment system template with additional information
-    system_template = f"Ensure that your generated output is finished before the \
-                    amount of tokens run out. This is to ensure that your output is not cut off mid-way. \
-                    Amount of tokens: {max_tokens} \
-                    Following is your prompt: {system_template}"
+    # Augment system template with additional information (detailed for reliable output)
+    augmented_system_template = f"Before generating your text, understand the following steps : \
+        1. This is the maximum limit of characters for you to write with : {max_tokens} \
+        2. You should generate a complete text WITHOUT overstepping this limit. \
+        3. Be prepared to write short, consise texts as your max limit can be lower than default. \
+        4. End the generated text with : '- Your Friendly Generator.' \
+        5. To the best of your ability, take spelling errors into considerations in all prompts. \
+        This is the template for you to generate a texts of of : {system_template}"
 
     # Initialize the model
     llm = ChatOpenAI(model_name="gpt-3.5-turbo",
@@ -84,7 +90,7 @@ def generate_output(system_template, product_description, max_tokens=300):
 
     # Translate the prompt
     chat_prompt = ChatPromptTemplate.from_messages([
-        system_template,
+        augmented_system_template,
         human_prompt])
     final_prompt = chat_prompt.format_prompt(
         product_description_temp=product_description)
@@ -98,10 +104,11 @@ class CourseGenerator:
     """
     Class providing static methods to generate marketing content
     and course outlines. It's purpose is to structure the module.
-    """
+    Methods are all based of of global function
+    generated_output."""
 
     @staticmethod
-    def generate_titles(description, max_tokens=300):
+    def generate_titles(description:str, max_tokens=1000) -> str:
         """
         Generate creative persuasive titles for a product.
 
@@ -122,7 +129,7 @@ class CourseGenerator:
         return generate_output(system_template, description, max_tokens)
 
     @staticmethod
-    def generate_marketing_text(description, max_tokens=300):
+    def generate_marketing_text(description:str, max_tokens=1000) -> str:
         """
         Generate creative persuasive marketing text about a product.
 
@@ -143,16 +150,16 @@ class CourseGenerator:
         return generate_output(system_template, description, max_tokens)
 
     @staticmethod
-    def generate_course_outline(description, course_difficulty, max_tokens=300):
+    def generate_course_outline(description:str, course_difficulty='Intermediate', max_tokens=1000) -> str:
         """
-        Generate a course plan/outline for beginners or advanced students.
+        Generate a course plan/outline for students at any level.
 
         Parameters
         ----------
         description : str
             Description of the course.
-        course_difficulty : str
-            The difficulty level of the course. It must be either 'beginner' or 'advanced'.
+        course_difficulty : str, optional
+            The difficulty level of the course.
         max_tokens : int, optional
             The maximum number of tokens for the output.
 
@@ -166,18 +173,22 @@ class CourseGenerator:
         ValueError
             If the course_difficulty is not one of the specified choices.
         """
-        if course_difficulty not in ['beginner', 'advanced']:
-            raise ValueError("course_difficulty must be either 'beginner' or 'advanced'")
-
+        # Create a detailed / clear template rather than a simple one for a reliable response.
+        difficulty_template = f"Follow the steps to choose a difficulty : \
+                        1. Try to translate the given difficulty parameter into a course difficulty. \
+                            Difficulty parameter : {course_difficulty} \
+                        2. If the difficulty parameter does not make sense / is not related to difficulty, \
+                            default the difficulty to 'Intermediate'. \
+                        3. Mention difficulty in your response."
         system_template = f"You are a teacher in the following subjects: IT, cloud solutions, \
                         system architecture, ML and AI. You will generate a course \
-                        plan/outline for {course_difficulty} students based on the \
-                        description of a course."
+                        plan/outline, taking into account the difficulty level. \
+                        Difficulty information : {difficulty_template}"
         return generate_output(system_template, description, max_tokens)
 
 
     @staticmethod
-    def generate_coding_exercises(subject, difficulty=None, max_tokens=300):
+    def generate_coding_exercises(subject:str, difficulty=None, max_tokens=1000) -> str:
         """
         Generate coding exercises for the given subject.
 
@@ -195,9 +206,15 @@ class CourseGenerator:
         str
             Generated coding exercises.
         """
-        system_template = "You are a teacher in programming in Python. Generate a coding exercise for \
+        
+        difficulty_template = f"Follow the steps to choose a difficulty : \
+                        1. Try to translate the given difficulty parameter into an exersize difficulty. \
+                            Difficulty parameter : {difficulty} \
+                        2. If the difficulty parameter does not make sense / is not related to difficulty, \
+                            default the difficulty to 'Intermediate'. \
+                        3. Mention difficulty in your response."
+        system_template = f"You are a teacher in programming in Python. Generate a coding exercise for \
                         the given subject. If a difficulty is given, match that in the complexity of \
-                        the problem"
-        if difficulty:
-            subject += f'Make this problem at {difficulty} difficulty'
+                        the problem. \
+                        Difficulty information : {difficulty_template}"
         return generate_output(system_template, subject, max_tokens)
