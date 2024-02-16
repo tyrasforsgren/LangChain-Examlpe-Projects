@@ -17,7 +17,9 @@ class TextToSpeech:
     def extract_text_from_image(image): # TODO: Working but needs prior attention
         # Use pytesseract to extract text from the image
         processed_image = fromarray(image)
-        extracted_text = pytesseract.image_to_string(processed_image)
+        # extracted_text = pytesseract.image_to_string(processed_image)
+        custom_config = r'--oem 3 --psm 6 -l swe'  # Specify language as Swedish
+        extracted_text = pytesseract.image_to_string(processed_image, config=custom_config)
 
         return extracted_text
     
@@ -36,6 +38,26 @@ class TextToSpeech:
         # Use LangChain and/or OPEN AI API to generate speech for the summary text
         speech = ""  # Placeholder for generated speech
         return speech
+    
+    def enhance_text(image):
+        # Convert the image to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # Apply adaptive thresholding to create a binary image
+        _ , binary = cv2.threshold(gray,
+                                       180,
+                                       255,
+                                       cv2.THRESH_BINARY_INV)
+        #                               11,
+        #                               4)
+
+        # Apply median blur to reduce noise
+        blurred = cv2.medianBlur(binary, 5)
+        # plt.imshow(binary)
+        # Sharpen the image using the unsharp masking technique
+        sharpened = cv2.addWeighted(blurred, 1.0, binary, -0.5, 0)
+
+        return binary#sharpened
 
 
 
