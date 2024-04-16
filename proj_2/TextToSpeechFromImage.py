@@ -5,13 +5,25 @@ import matplotlib.pyplot as plt
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from PIL.Image import fromarray
+import os
+from dotenv import load_dotenv
+from ImageHandeling import BasicImageHandeling
+import pyttsx3
 
+load_dotenv()
+API_KEY = os.getenv('API_KEY_3')
 
 class TextToSpeech:
     def __init__(self, image): # TODO is this needed?
-        # self.image_path = image_path
-        # self.image = image #BasicImageHandeling.read_image(image_path)
         pass
+
+    @staticmethod
+    def read_text(text):
+        # Initialize the text-to-speech engine
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 150)  # You can adjust the speaking rate
+        engine.say(text)
+        engine.runAndWait()
 
     @staticmethod
     def extract_text_from_image(image): # TODO: Working but needs prior attention
@@ -26,30 +38,42 @@ class TextToSpeech:
     def find_title_and_info(self):
         # Find the title, main color, and any special info in the package picture
         pass
-
+    
     @staticmethod
-    def generate_summary_text():
-        # Generate a summary text using LangChain and/or OPEN AI API
-        summary_text = ""  # Placeholder for generated summary text
-        return summary_text
-    
-    staticmethod
     def generate_speech():
-        # Use LangChain and/or OPEN AI API to generate speech for the summary text
-        speech = ""  # Placeholder for generated speech
-        return speech
-    
-    def enhance_text(image):
+            # Use LangChain and/or OPEN AI API to generate speech for the summary text
+            speech = ""  # Placeholder for generated speech
+            return speech
+        
+    def summarize_text(text, max_char=300, summary_div=5):
+        max_char = max_char // summary_div
+        llm = ChatOpenAI(
+            model_name="gpt-3.5-turbo",
+            openai_api_key=API_KEY,
+            temperature=1,
+            max_tokens=max_char
+        )
+
+        system_template = f'You are a professional writer. \
+            You are supposed to summarize the following text: {text}. \
+            Finish the summary before reaching {max_char} characters.'
+        chat_prompt = ChatPromptTemplate.from_messages([system_template])
+        final_prompt = chat_prompt.format_prompt(product_description_temp=text)
+
+        result = llm.invoke(final_prompt)
+        return result.content
+
+    def enhance_text(image): # TODO: It's bad
         # Convert the image to grayscale
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         # Apply adaptive thresholding to create a binary image
-        _ , binary = cv2.threshold(gray,
-                                       180,
-                                       255,
-                                       cv2.THRESH_BINARY_INV)
-        #                               11,
-        #                               4)
+        binary = cv2.adaptiveThreshold(gray,
+                                255,
+                                cv2.ADAPTIVE_THRESH_MEAN_C, # A alg
+                                cv2.THRESH_BINARY,
+                                15,
+                                4)
 
         # Apply median blur to reduce noise
         blurred = cv2.medianBlur(binary, 5)
@@ -61,74 +85,38 @@ class TextToSpeech:
 
 
 
-class BasicImageHandeling:
+# TODO : Method to let u select coords w mouse?
 
-    @staticmethod
-    def read_image(image_path):
-        return cv2.imread(image_path)
-    
-    @staticmethod
-    def show_image(image):
-        plt.axis('off')
-        plt.imshow(image)
 
-    @staticmethod
-    def crop_image(image,coords):
-        x, y, w, h = coords
-        return image[y:y+h, x:x+w]
-    
-    @staticmethod
-    def save_output_images(): # TODO
-        # Save o
-        # utput images and other results
-        pass
+# TODO:
+# Fix API!!!!
+# find main color, title, info from PACKAGE image
+# Save the img
+# summarize txt
+# read out
 
-    @staticmethod
-    def get_main_color_from_image(image): # TODO
-        return (255,255,255)
 
-    @staticmethod
-    def divide_rois(image, roi_coordinates):
-        """
-        Draws rectangles around the regions of interest (ROIs) on the image.
 
-        Parameters
-        ----------
-        image : numpy.ndarray
-            Input image.
-        roi_coordinates : dict
-            Dictionary containing ROI coordinates.
 
-        Returns
-        -------
-        numpy.ndarray
-            Image with rectangles drawn around the ROIs.
-        """
-        image_to_crop = image.copy()
-        roi_imgs = {}
-        # Iterate through each ROI
-        for roi_name, (x, y, w, h) in roi_coordinates.items():
-            roi_imgs[roi_name] = BasicImageHandeling.crop_image(image_to_crop,(x,y,w,h))
-        return roi_imgs
 
-    @staticmethod
-    def view_rois(image,roi_coordinates): # TODO: Quality of life
-        image_with_rectangles = image.copy()
-        
-        # Iterate through each ROI
-        for roi_name, (x, y, w, h) in roi_coordinates.items():
-            # Draw rectangle around the ROI
-            cv2.rectangle(image_with_rectangles, (x, y), (x + w, y + h), (0, 0, 255), 10)
-            text_x = 10  # Adjust as needed to leave some space between text and rectangle
-            text_y = y + 70  # Adjust as needed to position the text below the top edge of the rectangle
+'''
+# def format_text(text):
+#     max_char = 300
+#     if '\n' in text:
+#         return text
+#     llm = ChatOpenAI(
+#     model_name="gpt-3.5-turbo",
+#     openai_api_key=API_KEY,
+#     temperature=1,
+#     max_tokens=max_char
+#     )
 
-            # Draw the text inside the rectangle
-            cv2.putText(image_with_rectangles, roi_name,
-                        (text_x, text_y), fontFace=cv2.FONT_HERSHEY_SIMPLEX, thickness=5,
-                        color=(255, 0, 0), fontScale=2, lineType=cv2.LINE_AA)
-        
-        # Display the image with rectangles
-        plt.imshow(cv2.cvtColor(image_with_rectangles, cv2.COLOR_BGR2RGB))
-        plt.axis('off')
-        plt.show()
+#     system_template = f'You are a professional text editor. \
+#         You are supposed to reformat the following text: {text}. \
+#         Your goal is to add linebreaks to make the text into a paragraph.'
+#     chat_prompt = ChatPromptTemplate.from_messages([system_template])
+#     final_prompt = chat_prompt.format_prompt(product_description_temp=text)
 
+#     result = llm.invoke(final_prompt)
+#     return result.content
+'''
