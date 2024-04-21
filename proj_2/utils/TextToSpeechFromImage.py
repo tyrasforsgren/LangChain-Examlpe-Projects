@@ -7,15 +7,31 @@ from langchain.prompts import ChatPromptTemplate
 from PIL.Image import fromarray
 import os
 from dotenv import load_dotenv
-from ImageHandeling import BasicImageHandeling
+# from utils.ImageHandeling import BasicImageHandeling
 import pyttsx3
+# from googletrans import Translator
+import re
+
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY_3')
 
+def count_words(sentance,ret_words=False):
+    if isinstance(sentance,list): # Assumes each obj is a word
+        return len(list)
+    ret_words = sentance.split(' ') # Default
+
+    return len(ret_words), ret_words
+
 class TextToSpeech:
     def __init__(self, image): # TODO is this needed?
         pass
+
+    # @staticmethod
+    # def translate_text(text, dest_language='en'):
+    #     translator = Translator()
+    #     translated_text = translator.translate(text, dest=dest_language)
+    #     return translated_text.text
 
     @staticmethod
     def read_text(text):
@@ -26,24 +42,35 @@ class TextToSpeech:
         engine.runAndWait()
 
     @staticmethod
-    def extract_text_from_image(image): # TODO: Working but needs prior attention
+    def extract_biggest_title(image):
+        text = TextToSpeech.extract_text_from_image(image)
+        # Split the text into lines
+        # def extract_title_from_text(text):
+        # Define common title patterns (e.g., start with uppercase followed by lowercase)
+        title_pattern = r'\b[A-Z][a-z]+(?: [A-Z][a-z]+)*\b'
+
+        # Extract potential titles using regex
+        potential_titles = re.findall(title_pattern, text)
+
+        # Filter out false positives
+        known_non_titles = ['title:', 'chapter', 'chapter:', 'section', 'section:', 'part', 'part:']
+        filtered_titles = [title for title in potential_titles if title not in known_non_titles]
+
+        # Return the first extracted title (assuming the title is at the beginning of the text)
+        if filtered_titles:
+            return filtered_titles[0]
+        else:
+            return None
+
+    @staticmethod
+    def extract_text_from_image(image,language=r'--oem 3 --psm 6 -l swe'): # TODO: Working but needs prior attention
         # Use pytesseract to extract text from the image
         processed_image = fromarray(image)
         # extracted_text = pytesseract.image_to_string(processed_image)
-        custom_config = r'--oem 3 --psm 6 -l swe'  # Specify language as Swedish
+        custom_config = language  # Specify language as Swedish
         extracted_text = pytesseract.image_to_string(processed_image, config=custom_config)
 
         return extracted_text
-    
-    def find_title_and_info(self):
-        # Find the title, main color, and any special info in the package picture
-        pass
-    
-    @staticmethod
-    def generate_speech():
-            # Use LangChain and/or OPEN AI API to generate speech for the summary text
-            speech = ""  # Placeholder for generated speech
-            return speech
         
     def summarize_text(text, max_char=300, summary_div=5):
         max_char = max_char // summary_div
@@ -63,7 +90,7 @@ class TextToSpeech:
         result = llm.invoke(final_prompt)
         return result.content
 
-    def enhance_text(image): # TODO: It's bad
+    def enhance_image(image): # TODO: It's bad
         # Convert the image to grayscale
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -81,42 +108,8 @@ class TextToSpeech:
         # Sharpen the image using the unsharp masking technique
         sharpened = cv2.addWeighted(blurred, 1.0, binary, -0.5, 0)
 
-        return binary#sharpened
-
-
-
-# TODO : Method to let u select coords w mouse?
+        return blurred#sharpened
 
 
 # TODO:
-# Fix API!!!!
-# find main color, title, info from PACKAGE image
 # Save the img
-# summarize txt
-# read out
-
-
-
-
-
-'''
-# def format_text(text):
-#     max_char = 300
-#     if '\n' in text:
-#         return text
-#     llm = ChatOpenAI(
-#     model_name="gpt-3.5-turbo",
-#     openai_api_key=API_KEY,
-#     temperature=1,
-#     max_tokens=max_char
-#     )
-
-#     system_template = f'You are a professional text editor. \
-#         You are supposed to reformat the following text: {text}. \
-#         Your goal is to add linebreaks to make the text into a paragraph.'
-#     chat_prompt = ChatPromptTemplate.from_messages([system_template])
-#     final_prompt = chat_prompt.format_prompt(product_description_temp=text)
-
-#     result = llm.invoke(final_prompt)
-#     return result.content
-'''
