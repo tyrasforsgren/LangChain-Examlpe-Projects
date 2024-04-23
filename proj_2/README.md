@@ -88,3 +88,17 @@ The TextToSpeech module provides functionality for text extraction from images, 
 7. **Word Counting**: The `count_words` method counts the number of words in a sentence or a list of words. Users can optionally retrieve the list of words along with the word count.
 
 The TextToSpeech module serves as a versatile tool for working with text data, offering capabilities such as text extraction, summarization, translation, and speech synthesis.
+
+## Future Updates
+
+The project has room for several enhancements and features. Some of the improvements include:
+
+- **Enhancer Enhancement:** Improving the image enhancer functionality to enhance image quality further and provide better results.
+
+- **Translator Integration:** Integrating translation capabilities to enable users to translate text to different languages seamlessly.
+
+- **Screen-Fit Resize:** Implementing a feature to automatically resize images to fit the screen, ensuring optimal viewing experience.
+
+- **Text Formatting:** Adding text formatting to output summary. It is currently hard to interprate.
+
+These planned updates aim to enhance the functionality, usability, and performance of the image-to-text-to-speech project, providing users with a more robust and feature-rich experience.

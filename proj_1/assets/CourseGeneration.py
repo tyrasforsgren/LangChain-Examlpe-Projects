@@ -10,21 +10,6 @@ Functions/Classes:
     - CourseGenerator: Class providing static methods to 
     generate titles, marketing text, and course outlines.
 
-Example
--------
-from course_generator import CourseGenerator
-
-# Set API key from environment variables
-load_dotenv()
-API_KEY = os.getenv('API_KEY')
-
-# Generate marketing content
-description = "A course that teaches juniors how to code python"
-marketing_aid = CourseGenerator()
-print(marketing_aid.generate_titles(description))
-print(marketing_aid.generate_marketing_text(description))
-print(marketing_aid.generate_course_outline(description, course_difficulty='beginner'))
-print(marketing_aid.generate_coding_exercises("Pandas module"))
 """
 
 import os
@@ -34,12 +19,13 @@ from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 
 # Get secret API key from hidden .env file
 load_dotenv()
-API_KEY = os.getenv('API_KEY') # change key in .env file
+API_KEY = os.getenv('API_KEY_3') # change key in .env file
 
 
-def generate_output(system_template:str, product_description:str, max_tokens=1000) -> str:
+def generate_output(system_template:str, product_description:str, max_tokens: int) -> str:
     """
-    Generate output content for the chat using the ChatOpenAI model.
+    Generate output content based on the product description and a system template,
+    and inform the generator of limits and formatting requirements.
 
     Parameters
     ----------
@@ -103,7 +89,7 @@ def generate_output(system_template:str, product_description:str, max_tokens=100
 class CourseGenerator:
     """
     Class providing static methods to generate marketing content
-    and course outlines. It's purpose is to structure the module.
+    and course outlines. Its purpose is to structure the module.
     Methods are all based of of global function
     generated_output."""
 
@@ -146,7 +132,7 @@ class CourseGenerator:
             Generated marketing text.
         """
         system_template = "You are a marketing expert and will generate creative persuasive \
-                        marketing about a product."
+                        marketing text about a product."
         return generate_output(system_template, description, max_tokens)
 
     @staticmethod
@@ -160,8 +146,10 @@ class CourseGenerator:
             Description of the course.
         course_difficulty : str, optional
             The difficulty level of the course.
+            Default : Intermediate
         max_tokens : int, optional
             The maximum number of tokens for the output.
+            Default : 1000
 
         Returns
         -------
@@ -174,21 +162,19 @@ class CourseGenerator:
             If the course_difficulty is not one of the specified choices.
         """
         # Create a detailed / clear template rather than a simple one for a reliable response.
-        difficulty_template = f"Follow the steps to choose a difficulty : \
-                        1. Try to translate the given difficulty parameter into a course difficulty. \
-                            Difficulty parameter : {course_difficulty} \
-                        2. If the difficulty parameter does not make sense / is not related to difficulty, \
-                            default the difficulty to 'Intermediate'. \
-                        3. Mention difficulty in your response."
+        # difficulty_template = f"Follow the steps to choose a difficulty : \
+        #                 1. This is the difficulty to aim for : {course_difficulty} \
+        #                 2. 
+        #                 3. Mention difficulty in your response."
+        
         system_template = f"You are a teacher in the following subjects: IT, cloud solutions, \
-                        system architecture, ML and AI. You will generate a course \
-                        plan/outline, taking into account the difficulty level. \
-                        Difficulty information : {difficulty_template}"
+                        system architecture, ML and AI. \
+                        You will generate a course plan/outline, taking into account the difficulty level. \
+                        The difficultu level is '{course_difficulty}'."
         return generate_output(system_template, description, max_tokens)
 
-
     @staticmethod
-    def generate_coding_exercises(subject:str, difficulty=None, max_tokens=1000) -> str:
+    def generate_coding_exercises(subject:str, difficulty='Intermediate', max_tokens=1000) -> str:
         """
         Generate coding exercises for the given subject.
 
@@ -198,8 +184,10 @@ class CourseGenerator:
             The subject for which coding exercises are to be generated.
         difficulty : str, optional
             The difficulty level of the coding exercises.
+            Default : Intermediate
         max_tokens : int, optional
             The maximum number of tokens for the output.
+            Defautl : 1000
 
         Returns
         -------
@@ -210,8 +198,8 @@ class CourseGenerator:
         difficulty_template = f"Follow the steps to choose a difficulty : \
                         1. Try to translate the given difficulty parameter into an exersize difficulty. \
                             Difficulty parameter : {difficulty} \
-                        2. If the difficulty parameter does not make sense / is not related to difficulty, \
-                            default the difficulty to 'Intermediate'. \
+                        2. If the difficulty parameter does not make sense default it to \
+                        'Intermediate' \
                         3. Mention difficulty in your response."
         system_template = f"You are a teacher in programming in Python. Generate a coding exercise for \
                         the given subject. If a difficulty is given, match that in the complexity of \
