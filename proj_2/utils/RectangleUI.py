@@ -1,6 +1,5 @@
 import cv2
 
-
 # start win
 # draw rect
 # wait for input
@@ -77,5 +76,4 @@ class RectangleDrawer:
     def get_image_with_rectangles(self):
         return self.image_with_rectangles
 
-
-# TODO: REsize to fit screen
+# TODO: Resize to fit screen

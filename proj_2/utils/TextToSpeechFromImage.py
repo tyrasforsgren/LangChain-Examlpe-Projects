@@ -1,17 +1,14 @@
 
 import cv2
+import re
+import os
+import pyttsx3
 import pytesseract
-import matplotlib.pyplot as plt
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from PIL.Image import fromarray
-import os
 from dotenv import load_dotenv
-# from utils.ImageHandeling import BasicImageHandeling
-import pyttsx3
 # from googletrans import Translator
-import re
-
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY_3')
@@ -27,11 +24,12 @@ class TextToSpeech:
     def __init__(self, image): # TODO is this needed?
         pass
 
-    # @staticmethod
-    # def translate_text(text, dest_language='en'):
-    #     translator = Translator()
-    #     translated_text = translator.translate(text, dest=dest_language)
-    #     return translated_text.text
+    @staticmethod # TODO: Future update
+    def translate_text(text, dest_language='en'):
+        # translator = Translator()
+        # translated_text = translator.translate(text, dest=dest_language)
+        # return translated_text.text
+        pass
 
     @staticmethod
     def read_text(text):
@@ -110,6 +108,3 @@ class TextToSpeech:
 
         return blurred#sharpened
 
-
-# TODO:
-# Save the img

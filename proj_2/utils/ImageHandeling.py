@@ -1,59 +1,38 @@
 
 import cv2
-# import pytesseract
-import matplotlib.pyplot as plt
-from dotenv import load_dotenv
 import os
 import numpy as np
 from sklearn.cluster import KMeans
-import pytesseract
-from utils.TextToSpeechFromImage import TextToSpeech as tts
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
 
 load_dotenv()
 API_KEY = os.getenv('API_KEY_3')
 
 
-import matplotlib.pyplot as plt
-
-def display_color(color_rgb):
-    """
-    Display a small square containing the specified color.
-
-    Args:
-        color_rgb (tuple): RGB values of the color (e.g., (R, G, B)).
-    """
-    # Convert RGB values to range 0-1
-    color_rgb_normalized = (color_rgb[0] / 255, color_rgb[1] / 255, color_rgb[2] / 255)
-    
-    # Create a figure and axis
-    fig, ax = plt.subplots()
-
-    # Create a square patch with the specified color
-    square = plt.Rectangle((0, 0), 1, 1, color=color_rgb_normalized)
-
-    # Add the square to the axis
-    ax.add_patch(square)
-
-    # Set the aspect of the plot to equal
-    ax.set_aspect('equal', adjustable='box')
-
-    # Remove axes
-    ax.axis('off')
-
-    # Show the plot
-    plt.show()
-
-
 class BasicImageHandeling:
 
     @staticmethod
-    def read_image(image_path): # TODO: Options for reader? Look up documentation
+    def read_image(image_path):
         return cv2.imread(image_path)
 
     @staticmethod
     def show_image(image):
+        """
+        Display the given image using Matplotlib.
+
+        Args:
+            image (numpy.ndarray): The image to be displayed.
+        """
+        # Convert the image from BGR to RGB
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Turn off axis
         plt.axis('off')
-        plt.imshow(image)
+
+        # Display the image
+        plt.imshow(rgb_image)
+        plt.show()
 
     @staticmethod
     def crop_image(image,coords):
@@ -61,9 +40,22 @@ class BasicImageHandeling:
         return image[y:y+h, x:x+w]
     
     @staticmethod
-    def save_output_images(image,image_name='image.jpg'): # TODO
-        path = f'proj_2\data\{image_name}'
-        cv2.imwrite(path, image)
+    def save_output_image(image, image_name='image.jpg', directory='data'):
+        # TODO: If new dir defined by user, create it.
+        # Get the directory of the current script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Construct the full path to the output directory
+        output_dir = os.path.join(script_dir, directory)
+        
+        # Create the output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Change the current working directory to the output directory
+        os.chdir(output_dir)
+        
+        # Save the image with the specified name
+        cv2.imwrite(image_name, image)
 
     @staticmethod
     def find_dominant_colors(image, num_colors=3):
@@ -94,25 +86,55 @@ class BasicImageHandeling:
         return dominant_colors.astype(int)
 
     @staticmethod
-    def divide_rois(image, roi_coordinates):
+    def display_color(color_rgb):
         """
-        Draws rectangles around the regions of interest (ROIs) on the image.
+        Display a small square containing the specified color.
 
-        Parameters
-        ----------
-        image : numpy.ndarray
-            Input image.
-        roi_coordinates : dict
-            Dictionary containing ROI coordinates.
-
-        Returns
-        -------
-        numpy.ndarray
-            Image with rectangles drawn around the ROIs.
+        Args:
+            color_rgb (tuple): RGB values of the color (e.g., (R, G, B)).
         """
-        image_to_crop = image.copy()
-        roi_imgs = {}
-        # Iterate through each ROI
-        for roi_name, (x, y, w, h) in roi_coordinates.items():
-            roi_imgs[roi_name] = BasicImageHandeling.crop_image(image_to_crop,(x,y,w,h))
-        return roi_imgs
+        # Convert RGB values to range 0-1
+        color_rgb_normalized = (color_rgb[0] / 255, color_rgb[1] / 255, color_rgb[2] / 255)
+        
+        # Create a figure and axis
+        fig, ax = plt.subplots()
+
+        # Create a square patch with the specified color
+        square = plt.Rectangle((0, 0), 0.5, 0.5, color=color_rgb_normalized)
+
+        # Add the square to the axis
+        ax.add_patch(square)
+
+        # Set the aspect of the plot to equal
+        ax.set_aspect('equal', adjustable='box')
+
+        # Remove axes
+        ax.axis('off')
+
+        # Show the plot
+        plt.show()
+
+
+        @staticmethod
+        def divide_rois(image, roi_coordinates):
+            """
+            Draws rectangles around the regions of interest (ROIs) on the image.
+
+            Parameters
+            ----------
+            image : numpy.ndarray
+                Input image.
+            roi_coordinates : dict
+                Dictionary containing ROI coordinates.
+
+            Returns
+            -------
+            numpy.ndarray
+                Image with rectangles drawn around the ROIs.
+            """
+            image_to_crop = image.copy()
+            roi_imgs = {}
+            # Iterate through each ROI
+            for roi_name, (x, y, w, h) in roi_coordinates.items():
+                roi_imgs[roi_name] = BasicImageHandeling.crop_image(image_to_crop,(x,y,w,h))
+            return roi_imgs
