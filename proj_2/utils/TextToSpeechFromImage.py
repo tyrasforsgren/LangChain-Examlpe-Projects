@@ -191,7 +191,7 @@ class TextToSpeech:
         result = llm.invoke(final_prompt)
         return result.content
 
-    def enhance_image(image): # TODO: It's bad
+    def enhance_image(image): # TODO: Improved in update
         """
         Enhance the given image.
 
@@ -218,8 +218,5 @@ class TextToSpeech:
 
         # Apply median blur to reduce noise
         blurred = cv2.medianBlur(binary, 5)
-        # plt.imshow(binary)
-        # Sharpen the image using the unsharp masking technique
-        sharpened = cv2.addWeighted(blurred, 1.0, binary, -0.5, 0)
 
-        return blurred#sharpened
+        return blurred

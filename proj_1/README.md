@@ -18,5 +18,10 @@ A class offering static methods to generate marketing content and course outline
 - `generate_course_outline(description:str, course_difficulty='Intermediate', max_tokens=1000) -> str`: Generates a course plan/outline for students at any level.
 - `generate_coding_exercises(subject:str, difficulty=None, max_tokens=1000) -> str`: Generates coding exercises for the given subject.
 
+## Future Updates
+1. **Formatting**: Improve upon the format of some outputs, such as marketing generation, to make them more readable.
+
+2. **Limit advantage**: Encourage the generator to take advantage of its entire(hyperbole; almost entire) allowed character legnth. Cureently some texts stops generating too soon.
+
 ## Usage
 See `course_generation_DEMO.ipynb` file for detailed demo for use.

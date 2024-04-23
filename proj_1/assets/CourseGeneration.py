@@ -48,7 +48,7 @@ def generate_output(system_template:str, product_description:str, max_tokens: in
     and product description. The model aims to adhere to the max_tokens limit, but it may not always
     generate responses exactly at that length. Lower limits may result in truncated responses. Default
     is set to 1000, and maximum limits below this are not reccomended in most cases. Note that tokens
-    should adhere to the complexity of the prompt. 
+    should adhere to the complexity of the prompt. (The max tokens allowed is 4000)
 
     The system template is augmented with detailed information about the number of tokens and the provided prompt
     to assist in generating the content effectively.
@@ -62,6 +62,7 @@ def generate_output(system_template:str, product_description:str, max_tokens: in
         3. Be prepared to write short, consise texts as your max limit can be lower than default. \
         4. End the generated text with : '- Your Friendly Generator.' \
         5. To the best of your ability, take spelling errors into considerations in all prompts. \
+        6. Format your texts properly so that they are easy to read. \
         This is the template for you to generate a texts of of : {system_template}"
 
     # Initialize the model
@@ -111,7 +112,7 @@ class CourseGenerator:
             Generated titles.
         """
         system_template = "You are a marketing expert and will generate creative persuasive \
-                        titles for a product. Come up with several options."
+                        titles for a product. Come up with at least 10 options."
         return generate_output(system_template, description, max_tokens)
 
     @staticmethod
@@ -131,11 +132,12 @@ class CourseGenerator:
         str
             Generated marketing text.
         """
-        system_template = "You are a marketing expert and will generate creative persuasive \
-                        marketing text about a product."
+        system_template = "You are a marketing expert. \
+                        Create an ad for marketing a product.\
+                        The ad should be in text format, with several segments."
         return generate_output(system_template, description, max_tokens)
 
-    @staticmethod
+    @staticmethod # NOTE:Working
     def generate_course_outline(description:str, course_difficulty='Intermediate', max_tokens=1000) -> str:
         """
         Generate a course plan/outline for students at any level.
@@ -160,12 +162,7 @@ class CourseGenerator:
         ------
         ValueError
             If the course_difficulty is not one of the specified choices.
-        """
-        # Create a detailed / clear template rather than a simple one for a reliable response.
-        # difficulty_template = f"Follow the steps to choose a difficulty : \
-        #                 1. This is the difficulty to aim for : {course_difficulty} \
-        #                 2. 
-        #                 3. Mention difficulty in your response."
+        """       
         
         system_template = f"You are a teacher in the following subjects: IT, cloud solutions, \
                         system architecture, ML and AI. \
@@ -174,7 +171,7 @@ class CourseGenerator:
         return generate_output(system_template, description, max_tokens)
 
     @staticmethod
-    def generate_coding_exercises(subject:str, difficulty='Intermediate', max_tokens=1000) -> str:
+    def generate_coding_exercise(subject:str, difficulty='Intermediate', max_tokens=1000) -> str:
         """
         Generate coding exercises for the given subject.
 
@@ -194,15 +191,9 @@ class CourseGenerator:
         str
             Generated coding exercises.
         """
-        
-        difficulty_template = f"Follow the steps to choose a difficulty : \
-                        1. Try to translate the given difficulty parameter into an exersize difficulty. \
-                            Difficulty parameter : {difficulty} \
-                        2. If the difficulty parameter does not make sense default it to \
-                        'Intermediate' \
-                        3. Mention difficulty in your response."
-        system_template = f"You are a teacher in programming in Python. Generate a coding exercise for \
-                        the given subject. If a difficulty is given, match that in the complexity of \
-                        the problem. \
-                        Difficulty information : {difficulty_template}"
+        system_template = f"You are a teacher in programming in Python.\
+            You will create a coding exercize for your students and present it step-by-step. \
+            Take into account the difficulty level and adjust the exercise \
+            accordingly. The difficulty level is : '{difficulty}'. \
+            Mention difficulty in the title."
         return generate_output(system_template, subject, max_tokens)

@@ -101,4 +101,9 @@ The project has room for several enhancements and features. Some of the improvem
 
 - **Text Formatting:** Adding text formatting to output summary. It is currently hard to interprate.
 
+- **Contextual Summarization:** Developing a method that takes the entire image as input and provides contextual information for the summarized text, offering users a more comprehensive understanding of the content.
+
+- **Adress Language** Mention portential translation from another language when reading out summary.
+
+
 These planned updates aim to enhance the functionality, usability, and performance of the image-to-text-to-speech project, providing users with a more robust and feature-rich experience.
