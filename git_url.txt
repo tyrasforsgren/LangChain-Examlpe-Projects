@@ -1,1 +1,1 @@
-https://github.com/tyrasforsgren/LangChain_GPT-Exam
+https://github.com/tyrasforsgren/LangChain-Examlpe-Projects
